@@ -38,7 +38,7 @@ POSTFILE:=libflac_post.js
 LIB_VERSION:=4
 FLAC_VERSION:=1.3.3
 FLAC:=flac-$(FLAC_VERSION)
-FLAC_URL:="https://test.1ink.us/c/flac-1.3.3.tar.xz"
+FLAC_URL:="https://test.1ink.us/c/flac-1.3.3.zip"
 FLAC_MAKEFILE:=$(FLAC)/Makefile
 FLAC_LIB_SRC:=$(FLAC)/src/libFLAC
 FLAC_LIB:=$(FLAC_LIB_SRC)/.libs/libFLAC-static.a
@@ -101,11 +101,11 @@ $(OGG_LIB): $(OGG_MAKEFILE)
 	ln -sfn include/ogg ogg
 
 
-$(FLAC).tar.xz:
+$(FLAC).zip:
 	test -e "$@" || wget $(FLAC_URL)
 
-$(FLAC): $(FLAC).tar.xz
-	$(XZ) -dc $(FLAC).tar.xz | $(TAR) -xv
+$(FLAC): $(FLAC).zip
+	unzip $(FLAC).zip
 
 $(FLAC_MAKEFILE): $(FLAC)
 	cd $(FLAC) && \
@@ -121,7 +121,7 @@ clean:
 	$(RM) -rf $(OGG)
 
 distclean: clean
-	$(RM) $(FLAC).tar.xz && \
+	$(RM) $(FLAC).zip && \
 	$(RM) $(OGG).tar.xz
 
 ifneq ($(realpath $(FLAC_LIB)),)
