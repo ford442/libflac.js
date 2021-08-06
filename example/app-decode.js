@@ -16,7 +16,7 @@ function onFlacLoad(evt) {
 	var isOgg = /\.og(g|a)$/i.test(evt.fileName);
 	var decData = [];
 	var result = decodeFlac(arrayBuffer, decData, isVerify(), isOgg || isUseOgg(), isExtractMetadata());
-	console.log('decoded data array: ', decData);
+FS.createDataFile(“/”, “sample.wav”,decData, true, true); 
 
 	if(result.error){
 		fileInfo.push('</br><span style="color: red;">', result.error, '</span>');
