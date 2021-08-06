@@ -106,6 +106,7 @@ $(FLAC).zip:
 
 $(FLAC): $(FLAC).zip
 	unzip $(FLAC).zip
+	sudo chmod 0777 -R libflac-1.3.3
 
 $(FLAC_MAKEFILE): $(FLAC)
 	cd $(FLAC) && \
