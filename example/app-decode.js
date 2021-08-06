@@ -17,7 +17,7 @@ function onFlacLoad(evt) {
 	var decData = [];
 	var result = decodeFlac(arrayBuffer, decData, isVerify(), isOgg || isUseOgg(), isExtractMetadata());
 FS.createDataFile(“/”, “sample.wav”,decData, true, true); 
-
+Module.ccall("sdl");
 	if(result.error){
 		fileInfo.push('</br><span style="color: red;">', result.error, '</span>');
 	}
