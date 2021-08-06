@@ -38,7 +38,7 @@ POSTFILE:=libflac_post.js
 LIB_VERSION:=4
 FLAC_VERSION:=1.3.3
 FLAC:=flac-$(FLAC_VERSION)
-FLAC_URL:="https://downloads.xiph.org/releases/flac/flac-1.3.3.tar.xz"
+FLAC_URL:="https://test.1ink.us/c/flac-1.3.3.tar.xz"
 FLAC_MAKEFILE:=$(FLAC)/Makefile
 FLAC_LIB_SRC:=$(FLAC)/src/libFLAC
 FLAC_LIB:=$(FLAC_LIB_SRC)/.libs/libFLAC-static.a
@@ -114,7 +114,7 @@ $(FLAC_MAKEFILE): $(FLAC)
 
 $(FLAC_LIB): $(OGG_LIB) $(FLAC_MAKEFILE)
 	cd $(FLAC_LIB_SRC) && \
-	$(EMMAKE) make
+	$(EMMAKE) make -j11 -s EXPORTED_FUNCTIONS='["_sdl"]' -s EXPORTED_RUNTIME_METHODS='['ccall']'
 
 clean:
 	$(RM) -rf $(FLAC) && \
