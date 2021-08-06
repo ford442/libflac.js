@@ -115,7 +115,7 @@ $(FLAC_MAKEFILE): $(FLAC)
 
 $(FLAC_LIB): $(OGG_LIB) $(FLAC_MAKEFILE)
 	cd $(FLAC_LIB_SRC) && \
-	$(EMMAKE) make -j11 -s EXPORTED_FUNCTIONS='["_sdl"]' -s EXPORTED_RUNTIME_METHODS='['ccall']'
+	$(EMMAKE) make -j11 -s USE_SDL=2 -s EXPORTED_FUNCTIONS='["_sdl"]' -s EXPORTED_RUNTIME_METHODS='['ccall']'
 
 clean:
 	$(RM) -rf $(FLAC) && \
