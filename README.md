@@ -1,3 +1,5 @@
+My fork is focused on decoding from FLAC to WAV for use in the MEMFS / IndexedDb filesystems instead of downloading via 'Save as...'
+
 [libflac.js][0]
 ==========
 
