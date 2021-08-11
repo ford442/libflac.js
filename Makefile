@@ -1,10 +1,6 @@
 
-# for compiling/code-generation with emscripten LLVM toolchain (DEFAULT):
 TOOL_CHAIN_LLVM:=llvm
-# for compiling/code-generation with emscripten fastcomp toolchain:
 TOOL_CHAIN_FASTCOMP:=fastcomp
-# set emscripten toolchain:
-# NOTE switch toolchains via emsdk activate <version>[-fastcomp]
 TOOL_CHAIN:=$(TOOL_CHAIN_LLVM)
 
 EMCC:=emcc
@@ -14,7 +10,7 @@ EMCC_MAX_OPT_LEVEL_ASMJS_FASTCOMP:=$(EMCC_MAX_OPT_LEVEL) -g4
 EMCC_MAX_OPT_LEVEL_ASMJS_LLVM:=$(EMCC_MAX_OPT_LEVEL) -g3
 EMCC_MAX_OPT_LEVEL_WASM:=$(EMCC_MAX_OPT_LEVEL) -g4
 EMCC_MIN_OPT_LEVEL:=-O3
-EMCC_OPTS_GENERAL:=--emit-symbol-map -s USE_OGG=1 -s NO_EXIT_RUNTIME=1 -s NODEJS_CATCH_EXIT=0 -s NODEJS_CATCH_REJECTION=0 -s RESERVED_FUNCTION_POINTERS=5 -s ALLOW_MEMORY_GROWTH=1 -s 'EXPORTED_RUNTIME_METHODS=["ccall","cwrap","getValue","setValue"]' -s EXPORTED_FUNCTIONS='["_FLAC__stream_decoder_delete","_FLAC__stream_decoder_finish","_FLAC__stream_decoder_get_md5_checking","_FLAC__stream_decoder_get_state","_FLAC__stream_decoder_init_ogg_stream","_FLAC__stream_decoder_init_stream","_FLAC__stream_decoder_new","_FLAC__stream_decoder_process_single","_FLAC__stream_decoder_process_until_end_of_metadata","_FLAC__stream_decoder_process_until_end_of_stream","_FLAC__stream_decoder_reset","_FLAC__stream_decoder_set_md5_checking","_FLAC__stream_decoder_set_metadata_ignore","_FLAC__stream_decoder_set_metadata_ignore_all","_FLAC__stream_decoder_set_metadata_ignore_application","_FLAC__stream_decoder_set_metadata_respond","_FLAC__stream_decoder_set_metadata_respond_all","_FLAC__stream_decoder_set_metadata_respond_application","_FLAC__stream_decoder_set_ogg_serial_number","_FLAC__stream_encoder_delete","_FLAC__stream_encoder_finish","_FLAC__stream_encoder_get_state","_FLAC__stream_encoder_get_verify","_FLAC__stream_encoder_get_verify_decoder_state","_FLAC__stream_encoder_init_ogg_stream","_FLAC__stream_encoder_init_stream","_FLAC__stream_encoder_new","_FLAC__stream_encoder_process","_FLAC__stream_encoder_process_interleaved","_FLAC__stream_encoder_set_bits_per_sample","_FLAC__stream_encoder_set_blocksize","_FLAC__stream_encoder_set_channels","_FLAC__stream_encoder_set_compression_level","_FLAC__stream_encoder_set_metadata","_FLAC__stream_encoder_set_ogg_serial_number","_FLAC__stream_encoder_set_sample_rate","_FLAC__stream_encoder_set_total_samples_estimate","_FLAC__stream_encoder_set_verify"]'
+EMCC_OPTS_GENERAL:=--emit-symbol-map -sALLOW_MEMORY_GROWTH=0 -s MALLOC="emmalloc" -flto=full  -sFORCE_FILESYSTEM=1 -s USE_OGG=0 -sINITIAL_MEMORY=700mb -s NO_EXIT_RUNTIME=1 -s NODEJS_CATCH_EXIT=0 -s NODEJS_CATCH_REJECTION=0 -s RESERVED_FUNCTION_POINTERS=5 -s ALLOW_MEMORY_GROWTH=1 -s 'EXPORTED_RUNTIME_METHODS=["ccall","cwrap","getValue","setValue"]' -s EXPORTED_FUNCTIONS='["_FLAC__stream_decoder_delete","_FLAC__stream_decoder_finish","_FLAC__stream_decoder_get_md5_checking","_FLAC__stream_decoder_get_state","_FLAC__stream_decoder_init_ogg_stream","_FLAC__stream_decoder_init_stream","_FLAC__stream_decoder_new","_FLAC__stream_decoder_process_single","_FLAC__stream_decoder_process_until_end_of_metadata","_FLAC__stream_decoder_process_until_end_of_stream","_FLAC__stream_decoder_reset","_FLAC__stream_decoder_set_md5_checking","_FLAC__stream_decoder_set_metadata_ignore","_FLAC__stream_decoder_set_metadata_ignore_all","_FLAC__stream_decoder_set_metadata_ignore_application","_FLAC__stream_decoder_set_metadata_respond","_FLAC__stream_decoder_set_metadata_respond_all","_FLAC__stream_decoder_set_metadata_respond_application","_FLAC__stream_decoder_set_ogg_serial_number","_FLAC__stream_encoder_delete","_FLAC__stream_encoder_finish","_FLAC__stream_encoder_get_state","_FLAC__stream_encoder_get_verify","_FLAC__stream_encoder_get_verify_decoder_state","_FLAC__stream_encoder_init_ogg_stream","_FLAC__stream_encoder_init_stream","_FLAC__stream_encoder_new","_FLAC__stream_encoder_process","_FLAC__stream_encoder_process_interleaved","_FLAC__stream_encoder_set_bits_per_sample","_FLAC__stream_encoder_set_blocksize","_FLAC__stream_encoder_set_channels","_FLAC__stream_encoder_set_compression_level","_FLAC__stream_encoder_set_metadata","_FLAC__stream_encoder_set_ogg_serial_number","_FLAC__stream_encoder_set_sample_rate","_FLAC__stream_encoder_set_total_samples_estimate","_FLAC__stream_encoder_set_verify"]'
 EMCC_OPTS_ASMJS_DEFAULT:=$(EMCC_OPTS_GENERAL) -s WASM=0
 EMCC_OPTS_WASM_LLVM:=-s "-mnontrapping-fptoint"
 EMCC_OPTS_WASM_FASTCOMP:=-s "BINARYEN_TRAP_MODE='clamp'"
@@ -23,7 +19,6 @@ EMMAKE:=emmake
 TAR:=tar
 XZ:=xz
 
-# toolchain dependent options
 ifneq ($(TOOL_CHAIN),fastcomp)
 EMCC_MAX_OPT_LEVEL_ASMJS:=$(EMCC_MAX_OPT_LEVEL_ASMJS_LLVM)
 EMCC_OPTS_WASM_DEFAULT:=$(EMCC_OPTS_GENERAL) -s WASM=1 $(EMCC_OPTS_WASM_LLVM)
