@@ -1,10 +1,5 @@
-/**
- * HELPER read/extract stream info meta-data from frame header / meta-data
- * @param {POINTER} p_streaminfo
- * @returns StreamInfo
- */
-function _readStreamInfo(p_streaminfo){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_STREAMINFO (0)
 
+function _readStreamInfo(p_streaminfo){
 var min_blocksize=Module.getValue(p_streaminfo,'i32');//4 bytes
 var max_blocksize=Module.getValue(p_streaminfo+4,'i32');//4 bytes
 var min_framesize=Module.getValue(p_streaminfo+8,'i32');//4 bytes
@@ -19,7 +14,6 @@ return {
 min_blocksize:min_blocksize,max_blocksize:max_blocksize,min_framesize:min_framesize,max_framesize:max_framesize,sampleRate:sample_rate,channels:channels,bitsPerSample:bits_per_sample,total_samples:total_samples,md5sum:md5sum
 };
 }
-
 function _readMd5(p_md5){
 var sb=[],v,str;
 for(var i=0,len=16; i<len; ++i){
@@ -31,22 +25,13 @@ sb.push(str);
 }
 return sb.join('');
 }
-
 function _readFrameHdr(p_frame,enc_opt){
-
 var blocksize=Module.getValue(p_frame,'i32');//4 bytes
 var sample_rate=Module.getValue(p_frame+4,'i32');//4 bytes
 var channels=Module.getValue(p_frame+8,'i32');//4 bytes
-// 0: FLAC__CHANNEL_ASSIGNMENT_INDEPENDENT	independent channels
-// 1: FLAC__CHANNEL_ASSIGNMENT_LEFT_SIDE 	left+side stereo
-// 2: FLAC__CHANNEL_ASSIGNMENT_RIGHT_SIDE 	right+side stereo
-// 3: FLAC__CHANNEL_ASSIGNMENT_MID_SIDE 	mid+side stereo
 var channel_assignment=Module.getValue(p_frame+12,'i32');//4 bytes
 var bits_per_sample=Module.getValue(p_frame+16,'i32');
-// 0: FLAC__FRAME_NUMBER_TYPE_FRAME_NUMBER 	number contains the frame number
-// 1: FLAC__FRAME_NUMBER_TYPE_SAMPLE_NUMBER	number contains the sample number of first sample in frame
 var number_type=Module.getValue(p_frame+20,'i32');
-// union {} number: The frame number or sample number of first sample in frame; use the number_type value to determine which to use.
 var frame_number=Module.getValue(p_frame+24,'i32');
 var sample_number=Module.getValue(p_frame+24,'i64');
 var number=number_type === 0?frame_number:sample_number;
@@ -65,23 +50,22 @@ blocksize:blocksize,sampleRate:sample_rate,channels:channels,channelAssignment:c
 };
 }
 function _readSubFrameHdr(p_subframe,subOffset,block_size,enc_opt){
-
 var type=Module.getValue(p_subframe+subOffset.offset,'i32');
 subOffset.offset+=4;
 var data;
 switch(type){
-case 0:	//FLAC__SUBFRAME_TYPE_CONSTANT
+case 0:
 data={value:Module.getValue(p_subframe+subOffset.offset,'i32')};
 subOffset.offset+=284;//4;
 break;
-case 1:	//FLAC__SUBFRAME_TYPE_VERBATIM
+case 1:
 data=Module.getValue(p_subframe+subOffset.offset,'i32');
 subOffset.offset+=284;//4;
 break;
-case 2:	//FLAC__SUBFRAME_TYPE_FIXED
+case 2:	
 data=_readSubFrameHdrFixedData(p_subframe,subOffset,block_size,false,enc_opt);
 break;
-case 3:	//FLAC__SUBFRAME_TYPE_LPC
+case 3:
 data=_readSubFrameHdrFixedData(p_subframe,subOffset,block_size,true,enc_opt);
 break;
 }
@@ -96,14 +80,12 @@ data:data,wastedBits:wasted_bits
 function _readSubFrameHdrFixedData(p_subframe_data,subOffset,block_size,is_lpc,enc_opt){
 var offset=subOffset.offset;
 var data={order:-1,contents:{parameters:[],rawBits:[]}};
-
 var entropyType=Module.getValue(p_subframe_data,'i32');
 offset+=4;
 var entropyOrder=Module.getValue(p_subframe_data+offset,'i32');
 data.order=entropyOrder;
 offset+=4;
 var partitions=1 << entropyOrder,params=data.contents.parameters,raws=data.contents.rawBits;
-
 var ppart=Module.getValue(p_subframe_data+offset,'i32');
 var pparams=Module.getValue(ppart,'i32');
 var praw=Module.getValue(ppart+4,'i32');
@@ -134,23 +116,19 @@ offset=_readSubFrameHdrWarmup(p_subframe_data,offset,warmup,order);
 if(enc_opt && enc_opt.analyseResiduals){
 offset=subOffset.offset+280;
 res=_readSubFrameHdrResidual(p_subframe_data+offset,block_size,order);
-}
-}else{
+}}else{
 offset=_readSubFrameHdrWarmup(p_subframe_data,offset,warmup,order);
 offset=subOffset.offset+32;
 if(enc_opt && enc_opt.analyseResiduals){
 res=_readSubFrameHdrResidual(p_subframe_data+offset,block_size,order);
-}
-}
+}}
 subOffset.offset+=284;
 return {
 partition:{
 type:entropyType,data:data
 },order:order,warmup:warmup,residual:res
-};
-}
+};}
 function _readSubFrameHdrWarmup(p_subframe_data,offset,warmup,order){
-// FLAC__int32 	warmup [FLAC__MAX_FIXED_ORDER | FLAC__MAX_LPC_ORDER]
 for(var i=0; i<order; ++i){
 warmup.push(Module.getValue(p_subframe_data+offset,'i32'));
 offset+=4;
@@ -189,36 +167,26 @@ sb.push(String.fromCodePoint(ch));
 }
 return sb.join('');
 }
-
 function _readPaddingMetadata(p_padding_metadata){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_PADDING (1)
 return {
 dummy:Module.getValue(p_padding_metadata,'i32')
-};
-}
-
+};}
 function _readApplicationMetadata(p_application_metadata){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_APPLICATION (2)
 return {
 id:Module.getValue(p_application_metadata,'i32'),data:Module.getValue(p_application_metadata+4,'i32')//TODO should read (binary) data?
-};
-}
-
+};}
 function _readSeekTableMetadata(p_seek_table_metadata){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_SEEKTABLE (3)
 var num_points=Module.getValue(p_seek_table_metadata,'i32');
 var ptrPoints=Module.getValue(p_seek_table_metadata+4,'i32');
 var points=[];
 for(var i=0; i<num_points; ++i){
-
 points.push({
 sample_number:Module.getValue(ptrPoints+(i*24),'i64'),stream_offset:Module.getValue(ptrPoints+(i*24)+8,'i64'),frame_samples:Module.getValue(ptrPoints+(i*24)+16,'i32')
-});
-}
+});}
 return {
 num_points:num_points,points:points
-};
-}
-
+};}
 function _readVorbisComment(p_vorbiscomment){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_VORBIS_COMMENT (4)
-
 var length=Module.getValue(p_vorbiscomment,'i32');
 var entry=Module.getValue(p_vorbiscomment+4,'i32');
 var sb=[];
@@ -227,7 +195,6 @@ var num_comments=Module.getValue(p_vorbiscomment+8,'i32');
 var comments=[],clen,centry;
 var pc=Module.getValue(p_vorbiscomment+12,'i32');
 for(var i=0; i<num_comments; ++i){
-
 clen=Module.getValue(pc+(i*8),'i32');
 if(clen === 0){
 continue;
@@ -237,11 +204,8 @@ comments.push(_readConstChar(centry,clen,sb));
 }
 return {
 vendor_string:strEntry,num_comments:num_comments,comments:comments
-};
-}
-
+};}
 function _readCueSheetMetadata(p_cue_sheet){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_CUESHEET (5)
-
 var sb=[];
 var media_catalog_number=_readConstChar(p_cue_sheet,129,sb);
 var lead_in=Module.getValue(p_cue_sheet+136,'i64');
@@ -254,15 +218,11 @@ for(var i=0; i<num_tracks; ++i){
 var tr=_readCueSheetMetadata_track(trackOffset,sb);
 tracks.push(tr);
 trackOffset+=32;
-}
-}
+}}
 return {
 media_catalog_number:media_catalog_number,lead_in:lead_in,is_cd:is_cd,num_tracks:num_tracks,tracks:tracks
-};
-}
-
+};}
 function _readCueSheetMetadata_track(p_cue_sheet_track,sb){
-
 var typePremph=Module.getValue(p_cue_sheet_track+22,'i8');
 var num_indices=Module.getValue(p_cue_sheet_track+23,'i8');
 var indices=[];
@@ -272,18 +232,13 @@ offset:Module.getValue(p_cue_sheet_track,'i64'),number:Module.getValue(p_cue_she
 var idx;
 if(num_indices>0){
 idx=Module.getValue(p_cue_sheet_track+24,'i32');
-
 for(var i=0; i<num_indices; ++i){
 indices.push({
 offset:Module.getValue(idx+(i*16),'i64'),number:Module.getValue(idx+(i*16)+8,'i8')
-});
-}
-}
+});}}
 return track;
 }
-
 function _readPictureMetadata(p_picture_metadata){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_PICTURE (6)
-
 var type=Module.getValue(p_picture_metadata,'i32');
 var mime=Module.getValue(p_picture_metadata+4,'i32');
 var sb=[];
@@ -299,15 +254,12 @@ var data=Module.getValue(p_picture_metadata+32,'i32');
 var buffer=Uint8Array.from(Module.HEAPU8.subarray(data,data+data_length));
 return {
 type:type,mime_type:mime_type,description:description,width:width,height:height,depth:depth,colors:colors,data_length:data_length,data:buffer
-};
-}
-
+};}
 function __fix_write_buffer(heapOffset,newBuffer,applyFix){
 var dv=new DataView(newBuffer.buffer);
 var targetSize=newBuffer.length;
 var increase=!applyFix?1:2;//<- for FIX/workaround, NOTE: e.g. if 24-bit padding occurres, there is no fix/increase needed (more details comment below)
 var buffer=HEAPU8.subarray(heapOffset,heapOffset+targetSize*increase);
-
 var jump,isPrint;
 for(var i=0,j=0,size=buffer.length; i<size && j<targetSize; ++i, ++j){
 if(i === size-1 && j<targetSize-1){
@@ -324,13 +276,10 @@ if(buffer[i] === buffer[i+2]){
 ++jump;
 }else{
 isPrint=false;
-}
-}
-}
+}}}
 if(isPrint){
 dv.setUint8(j,buffer[i]);
 if(jump === 2 && i+3<size && buffer[i] === buffer[i+3]){
-
 ++jump;
 dv.setUint8(++j,buffer[i]);
 }
@@ -340,22 +289,18 @@ dv.setUint8(++j,buffer[i]);
 i+=jump;//<- apply jump, if there were value duplications
 }else{
 dv.setUint8(j,buffer[i]);
-}
-}
-}
+}}}
 var FLAC__STREAM_DECODER_READ_STATUS_CONTINUE=0;
 var FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM=1;
 var FLAC__STREAM_DECODER_READ_STATUS_ABORT=2;
 var FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE=0;
 var FLAC__STREAM_DECODER_WRITE_STATUS_ABORT=1;
-
 var FLAC__STREAM_DECODER_INIT_STATUS_OK=0;
 var FLAC__STREAM_DECODER_INIT_STATUS_UNSUPPORTED_CONTAINER=1;
 var FLAC__STREAM_DECODER_INIT_STATUS_INVALID_CALLBACKS=2;
 var FLAC__STREAM_DECODER_INIT_STATUS_MEMORY_ALLOCATION_ERROR=3;
 var FLAC__STREAM_DECODER_INIT_STATUS_ERROR_OPENING_FILE=4;
 var FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED=5;
-
 var FLAC__STREAM_ENCODER_INIT_STATUS_OK=0;
 var FLAC__STREAM_ENCODER_INIT_STATUS_ENCODER_ERROR=1;
 var FLAC__STREAM_ENCODER_INIT_STATUS_UNSUPPORTED_CONTAINER=2;
@@ -372,28 +317,21 @@ var FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_METADATA=12;
 var FLAC__STREAM_ENCODER_INIT_STATUS_ALREADY_INITIALIZED=13;
 var FLAC__STREAM_ENCODER_WRITE_STATUS_OK=0;
 var FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR=1;
-
 var coders={};
-
 function getCallback(p_coder,func_type){
 if(coders[p_coder]){
 return coders[p_coder][func_type];
-}
-}
-
+}}
 function setCallback(p_coder,func_type,callback){
 if(!coders[p_coder]){
 coders[p_coder]={};
 }
 coders[p_coder][func_type]=callback;
 }
-
 function _getOptions(p_coder){
 if(coders[p_coder]){
 return coders[p_coder]["options"];
-}
-}
-
+}}
 function _setOptions(p_coder,options){
 if(!coders[p_coder]){
 coders[p_coder]={};
@@ -454,7 +392,6 @@ var write_callback_fn=getCallback(p_decoder,'write');
 var res=write_callback_fn(data,frameInfo);//, clientData);
 return res !== false?FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE:FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
 },'iiiii');
-
 var DecoderErrorCode={
 0:'FLAC__STREAM_DECODER_ERROR_STATUS_LOST_SYNC',1:'FLAC__STREAM_DECODER_ERROR_STATUS_BAD_HEADER',2:'FLAC__STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH',3:'FLAC__STREAM_DECODER_ERROR_STATUS_UNPARSEABLE_STREAM'
 };
@@ -464,7 +401,6 @@ var error_callback_fn=getCallback(p_decoder,'error');
 error_callback_fn(err,msg,p_client_data);
 },'viii');
 var metadata_fn_ptr=addFunction(function(p_coder,p_metadata,p_client_data){
-
 var type=Module.getValue(p_metadata,'i32');//4 bytes
 var is_last=Module.getValue(p_metadata+4,'i32');//4 bytes
 var length=Module.getValue(p_metadata+8,'i64');//8 bytes
@@ -478,36 +414,33 @@ metadata_callback_fn(meta_data.data,meta_data);
 }else{
 var data;
 switch(type){
-case 1: //FLAC__METADATA_TYPE_PADDING
+case 1: 
 data=_readPaddingMetadata(p_metadata+16);
 break;
-case 2: //FLAC__METADATA_TYPE_APPLICATION
+case 2: 
 data=readApplicationMetadata(p_metadata+16);
 break;
-case 3: //FLAC__METADATA_TYPE_SEEKTABLE
+case 3: 
 data=_readSeekTableMetadata(p_metadata+16);
 break;
-case 4: //FLAC__METADATA_TYPE_VORBIS_COMMENT
+case 4: 
 data=_readVorbisComment(p_metadata+16);
 break;
-case 5: //FLAC__METADATA_TYPE_CUESHEET
+case 5: 
 data=_readCueSheetMetadata(p_metadata+16);
 break;
-case 6: //FLAC__METADATA_TYPE_PICTURE
+case 6: 
 data=_readPictureMetadata(p_metadata+16);
 break;
-default:{ //NOTE this should not happen, and the raw data is very likely not correct!
+default:{ 
 var cod_opts=_getOptions(p_coder);
 if(cod_opts && cod_opts.enableRawMetadata){
 var buffer=Uint8Array.from(HEAPU8.subarray(p_metadata+16,p_metadata+16+length));
 meta_data.raw=buffer;
-}
-}
-}
+}}}
 meta_data.data=data;
 metadata_callback_fn(void (0),meta_data);
-}
-},'viii');
+}},'viii');
 var listeners={};
 var persistedEvents=[];
 var add_event_listener=function(eventName,listener){
@@ -527,20 +460,14 @@ activated=persistedEvents[i];
 if(activated && activated.event === eventName){
 listener.apply(null,activated.args);
 break;
-}
-}
-};
+}}};
 var remove_event_listener=function(eventName,listener){
 var list=listeners[eventName];
 if(list){
 for(var i=list.length-1; i>=0; --i){
 if(list[i] === listener){
 list.splice(i,1);
-}
-}
-}
-};
-
+}}}};
 var do_fire_event=function(eventName,args,isPersist){
 if(_exported['on'+eventName]){
 _exported['on'+eventName].apply(null,args);
@@ -549,13 +476,10 @@ var list=listeners[eventName];
 if(list){
 for(var i=0,size=list.length; i<size; ++i){
 list[i].apply(null,args);
-}
-}
+}}
 if(isPersist){
 persistedEvents.push({event:eventName,args:args});
-}
-};
-
+}};
 var _exported={
 _module:Module,//internal: reference to Flac module
 _clear_enc_cb:function(enc_ptr){//internal function: remove reference to encoder instance and its callbacks
@@ -677,9 +601,7 @@ Module.ccall('FLAC__stream_decoder_set_ogg_serial_number','number',['number','nu
 }
 var init_func_name=!is_ogg?'FLAC__stream_decoder_init_stream':'FLAC__stream_decoder_init_ogg_stream';
 var init_status=Module.ccall(init_func_name,'number',['number','number','number','number','number','number','number','number','number','number'],[decoder,dec_read_fn_ptr,0,// 	FLAC__StreamDecoderSeekCallback
-0,
-0,
-0,
+0,0,0,
 dec_write_fn_ptr,__metadata_callback_fn_ptr,__error_callback_fn_ptr,client_data]);
 return init_status;
 },
@@ -712,15 +634,10 @@ FLAC__stream_decoder_get_state:Module.cwrap('FLAC__stream_decoder_get_state','nu
 FLAC__stream_encoder_get_state:Module.cwrap('FLAC__stream_encoder_get_state','number',['number']),
 FLAC__stream_decoder_set_metadata_respond:Module.cwrap('FLAC__stream_decoder_set_metadata_respond','number',['number','number']),
 FLAC__stream_decoder_set_metadata_respond_application:Module.cwrap('FLAC__stream_decoder_set_metadata_respond_application','number',['number','number']),// (FLAC__StreamDecoder *decoder, const FLAC__byte id[4])
-
 FLAC__stream_decoder_set_metadata_respond_all:Module.cwrap('FLAC__stream_decoder_set_metadata_respond_all','number',['number']),// (FLAC__StreamDecoder *decoder)
-
 FLAC__stream_decoder_set_metadata_ignore:Module.cwrap('FLAC__stream_decoder_set_metadata_ignore','number',['number','number']),// (FLAC__StreamDecoder *decoder, FLAC__MetadataType type)
-
 FLAC__stream_decoder_set_metadata_ignore_application:Module.cwrap('FLAC__stream_decoder_set_metadata_ignore_application','number',['number','number']),// (FLAC__StreamDecoder *decoder, const FLAC__byte id[4])
-
 FLAC__stream_decoder_set_metadata_ignore_all:Module.cwrap('FLAC__stream_decoder_set_metadata_ignore_all','number',['number']),// (FLAC__StreamDecoder *decoder)
-
 FLAC__stream_encoder_set_metadata:function(encoder,metadataBuffersPointer,num_blocks){// ( FLAC__StreamEncoder *  encoder, FLAC__StreamMetadata **  metadata, unsigned  num_blocks)
 var status=Module.ccall('FLAC__stream_encoder_set_metadata','number',['number','number','number'],[encoder,metadataBuffersPointer.pointerPointer,num_blocks]);
 return status;
@@ -745,8 +662,7 @@ var pointerHeap=new Uint8Array(Module.HEAPU8.buffer,pointerPtr,nPointerBytes);
 pointerHeap.set(new Uint8Array(ptrData.buffer));
 return {
 dataPointer:ptrs,pointerPointer:pointerPtr
-};
-},
+};},
 _destroy_pointer_array:function(pointerInfo){
 var pointerArray=pointerInfo.dataPointer;
 for(var i=0,size=pointerArray.length; i<size; ++i){
@@ -768,11 +684,10 @@ Module.ccall('FLAC__stream_encoder_delete','number',['number'],[encoder]);
 do_fire_event('destroyed',[{type:'destroyed',target:{id:encoder,type:'encoder'}}],false);
 },
 FLAC__stream_decoder_delete:function(decoder){
-this._clear_dec_cb(decoder);//<- remove callback references
+this._clear_dec_cb(decoder);
 Module.ccall('FLAC__stream_decoder_delete','number',['number'],[decoder]);
 do_fire_event('destroyed',[{type:'destroyed',target:{id:decoder,type:'decoder'}}],false);
-}
-};
+}};
 if(typeof Object.defineProperty === 'function'){
 _exported._onready= void (0);
 Object.defineProperty(_exported,'onready',{
@@ -780,9 +695,7 @@ get(){ return this._onready; },set(newValue){
 this._onready=newValue;
 if(newValue && this.isReady()){
 check_and_trigger_persisted_event('ready',newValue);
-}
-}
-});
+}}});
 }else{
 console.warn('WARN: note that setting Flac.onready handler after Flac.isReady() is already true, will have no effect, that is, the handler function will not be triggered!');
 }
@@ -790,4 +703,4 @@ if(expLib && expLib.exports){
 expLib.exports=_exported;
 }
 return _exported;
-}))
+}));
