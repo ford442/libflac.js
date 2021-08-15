@@ -1,4 +1,5 @@
 My fork is focused on decoding from FLAC to WAV for use in the MEMFS / IndexedDb filesystems instead of downloading via 'Save as...'
+Update: Now set to send the encoded WAV over BroadcastChannel postMessage to a seperate WASM for playback. 
 
 [libflac.js][0]
 ==========
