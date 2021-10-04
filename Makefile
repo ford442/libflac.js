@@ -59,7 +59,7 @@ dist/libflac.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
 	$(EMCC) $(EMCC_DEF_OPT_LEVEL) $(EMCC_OPTS_ASMJS_DEFAULT) --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 ## wasm release build
 dist/libflac.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
-	$(EMCC) $(EMCC_DEF_OPT_LEVEL) $(EMCC_OPTS_WASM_DEFAULT) -sPRINTF_LONG_DOUBLE=1 -sWASM_BIGINT=1 -ffast-math  -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_DUPLICATE_FUNCTIONS=1 -s MALLOC="emmalloc" --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
+	$(EMCC) $(EMCC_DEF_OPT_LEVEL) $(EMCC_OPTS_WASM_DEFAULT) -s MALLOC="emmalloc" --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 
 # min builds
 min_libs: $(FLAC_LIB) dist/libflac.min.js dist/libflac.min.wasm.js
