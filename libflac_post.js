@@ -350,7 +350,6 @@ num_points:num_points,points:points
  * @returns VorbisComment
  */
 function _readVorbisComment(p_vorbiscomment){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_VORBIS_COMMENT (4)
-/*
 // FLAC__StreamMetadata_VorbisComment
 // FLAC__StreamMetadata_VorbisComment_Entry vendor_string:
 // 		FLAC__uint32 	length
@@ -358,7 +357,7 @@ function _readVorbisComment(p_vorbiscomment){//-> FLAC__StreamMetadata.type (FLA
 var length=Module.getValue(p_vorbiscomment,'i32');
 var entry=Module.getValue(p_vorbiscomment+4,'i32');
 var sb=[];
-var strEntry=_readConstChar(entry,length,sb);
+var strEntry=''; // _readConstChar(entry,length,sb);
 // FLAC__uint32 	num_comments
 var num_comments=Module.getValue(p_vorbiscomment+8,'i32');
 // FLAC__StreamMetadata_VorbisComment_Entry * 	comments
@@ -375,10 +374,11 @@ continue;
 centry=Module.getValue(pc+(i*8)+4,'i32');
 comments.push(_readConstChar(centry,clen,sb));
 }
-*/
+/*
 	var strEntry ='';
 	var num_comments=0;
 	var comments=[];
+*/	
 return {
 vendor_string:strEntry,num_comments:num_comments,comments:comments
 };
