@@ -248,15 +248,33 @@ res.push(Module.getValue(pres+(i*4),'i32'));
 return res;
 }
 function _readConstChar(ptr,length,sb){
+console.log('[FLAC_DEBUG] _readConstChar called with ptr:', ptr, 'length:', length);
 sb.splice(0);
-var ch;
+var ch_raw, ch_processed; // Use different names to log raw and processed values
 for(var i=0; i<length; ++i){
-ch=Module.getValue(ptr+i,'i8');
-if(ch === 0){
+ch_raw = Module.getValue(ptr+i,'i8');
+console.log('[FLAC_DEBUG] ptr+i:', ptr+i, 'raw ch:', ch_raw, 'at i:', i);
+if(ch_raw === 0){
+console.log('[FLAC_DEBUG] encountered null terminator at i:', i);
 break;
 }
-sb.push(String.fromCodePoint(ch));
+ch_processed = ch_raw;
+// Convert to unsigned byte value if negative, before passing to fromCodePoint
+if (ch_processed < 0) {
+  console.log('[FLAC_DEBUG] ch_processed is negative:', ch_processed, 'applying fix.');
+  ch_processed = 256 + ch_processed;
+  console.log('[FLAC_DEBUG] ch_processed after fix:', ch_processed);
 }
+// Log right before the potentially problematic call
+console.log('[FLAC_DEBUG] About to call String.fromCodePoint with:', ch_processed);
+try {
+  sb.push(String.fromCodePoint(ch_processed));
+} catch (e) {
+  console.error('[FLAC_DEBUG] Error in String.fromCodePoint. ch_raw:', ch_raw, 'ch_processed:', ch_processed, 'Error:', e);
+  throw e; // Re-throw the error to see the original stack trace
+}
+}
+console.log('[FLAC_DEBUG] _readConstChar returning. sb:', sb.join(''));
 return sb.join('');
 }
 function _readNullTerminatedChar(ptr,sb){
