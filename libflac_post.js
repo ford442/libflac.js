@@ -378,7 +378,7 @@ comments.push(_readConstChar(centry,clen,sb));
 */
 	var strEntry ='';
 	var num_comments=0;
-	var comments=[],0,'';
+	var comments=[],0,0;
 return {
 vendor_string:strEntry,num_comments:num_comments,comments:comments
 };
