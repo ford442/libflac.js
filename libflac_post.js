@@ -267,6 +267,10 @@ ch=Module.getValue(ptr+i++,'i8');
 if(ch === 0){
 break;
 }
+    // Convert to unsigned byte value if negative, before passing to fromCodePoint
+    if (ch < 0) {
+      ch = 256 + ch;
+    }
 sb.push(String.fromCodePoint(ch));
 }
 return sb.join('');
