@@ -350,6 +350,7 @@ num_points:num_points,points:points
  * @returns VorbisComment
  */
 function _readVorbisComment(p_vorbiscomment){//-> FLAC__StreamMetadata.type (FLAC__MetadataType) === FLAC__METADATA_TYPE_VORBIS_COMMENT (4)
+/*
 // FLAC__StreamMetadata_VorbisComment
 // FLAC__StreamMetadata_VorbisComment_Entry vendor_string:
 // 		FLAC__uint32 	length
@@ -374,10 +375,16 @@ continue;
 centry=Module.getValue(pc+(i*8)+4,'i32');
 comments.push(_readConstChar(centry,clen,sb));
 }
+*/
+	var strEntry ='';
+	var num_comments=0;
+	var comments=[],0,'';
 return {
 vendor_string:strEntry,num_comments:num_comments,comments:comments
 };
 }
+
+
 /**
  * HELPER read/extract cue sheet meta-data from meta-data block
  * @param {POINTER} p_cue_sheet
