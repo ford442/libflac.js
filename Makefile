@@ -55,10 +55,12 @@ all: release_libs min_libs dev_libs
 release_libs: $(FLAC_LIB) dist/libflac.js dist/libflac.wasm.js
 
 ## asm.js release build
-dist/libflac.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_DEF_OPT_LEVEL) $(EMCC_OPTS_ASMJS_DEFAULT) --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 ## wasm release build
-dist/libflac.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.wasm.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_DEF_OPT_LEVEL) $(EMCC_OPTS_WASM_DEFAULT) --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 
 
@@ -66,10 +68,12 @@ dist/libflac.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
 min_libs: $(FLAC_LIB) dist/libflac.min.js dist/libflac.min.wasm.js
 
 ## asm.js min build
-dist/libflac.min.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.min.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_MIN_OPT_LEVEL) $(EMCC_OPTS_ASMJS_DEFAULT) --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 ## wasm min build
-dist/libflac.min.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.min.wasm.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_MIN_OPT_LEVEL) $(EMCC_OPTS_WASM_DEFAULT) --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 
 
@@ -77,10 +81,12 @@ dist/libflac.min.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
 dev_libs: $(FLAC_LIB) dist/libflac.dev.js dist/libflac.dev.wasm.js
 
 ## asm.js dev build
-dist/libflac.dev.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.dev.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_MAX_OPT_LEVEL_ASMJS) $(EMCC_OPTS_ASMJS_DEFAULT) -s ASSERTIONS=1 --source-map-base ./ --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 ## wasm dev build
-dist/libflac.dev.wasm.js: $(FLAC_LIB) $(PREFILE) $(POSTFILE)
+dist/libflac.dev.wasm.js: $(FLAC_LIB)
+	touch $(FLAC_LIB_SRC)/stream_decoder.c
 	$(EMCC) $(EMCC_MAX_OPT_LEVEL_WASM) $(EMCC_OPTS_WASM_DEFAULT) -s ASSERTIONS=1 --source-map-base ./ --pre-js $(PREFILE) --post-js $(POSTFILE) $(FLAC_LIB) -o $@
 
 
