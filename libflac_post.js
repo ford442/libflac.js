@@ -248,6 +248,7 @@ res.push(Module.getValue(pres+(i*4),'i32'));
 return res;
 }
 function _readConstChar(ptr,length,sb){
+console.error("!!!!!!!!!! EXECUTING MODIFIED _readConstChar !!!!!!!!!!"); // <-- ADD THIS LINE
 console.log('[FLAC_DEBUG] _readConstChar called with ptr:', ptr, 'length:', length);
 sb.splice(0);
 var ch_raw, ch_processed; // Use different names to log raw and processed values
