@@ -267,10 +267,10 @@ ch=Module.getValue(ptr+i++,'i8');
 if(ch === 0){
 break;
 }
-    // Convert to unsigned byte value if negative, before passing to fromCodePoint
-    if (ch < 0) {
-      ch = 256 + ch;
-    }
+// Convert to unsigned byte value if negative, before passing to fromCodePoint
+if (ch < 0) {
+  ch = 256 + ch;
+}
 sb.push(String.fromCodePoint(ch));
 }
 return sb.join('');
@@ -2473,12 +2473,5 @@ if(expLib && expLib.exports){
 expLib.exports=_exported;
 }
 return _exported;
-if(globalThis && !_exported.isReady() && typeof globalThis.document !== 'undefined'){
-  //ensure Flac is exported to global scope for browser environments
-  //if not already done by the pre-js script
-  if(typeof globalThis.Flac === 'undefined'){
-    globalThis.Flac = _exported;
-  }
-}
 }))
 //END: UMD wrapper
