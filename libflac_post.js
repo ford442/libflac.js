@@ -2469,5 +2469,12 @@ if(expLib && expLib.exports){
 expLib.exports=_exported;
 }
 return _exported;
+if(globalThis && !_exported.isReady() && typeof globalThis.document !== 'undefined'){
+  //ensure Flac is exported to global scope for browser environments
+  //if not already done by the pre-js script
+  if(typeof globalThis.Flac === 'undefined'){
+    globalThis.Flac = _exported;
+  }
+}
 }))
 //END: UMD wrapper
